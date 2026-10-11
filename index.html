@@ -80,6 +80,7 @@ a.title:hover{text-decoration:underline}
 .dbtn[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .dbtn.want[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
 .dbtn.later[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#fff}
+.dbtn.seen[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
 .dbtn.no[aria-pressed="true"]{background:var(--muted);border-color:var(--muted);color:#fff}
 .dbtn:focus-visible,.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .decide select{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--fg);padding:3px 6px}
@@ -98,7 +99,7 @@ a.title:hover{text-decoration:underline}
   <div class="tabs" role="tablist" id="tabs"></div>
   <div class="filters" id="filters"><span>Возраст:</span></div>
 
-  <div id="ideas-intro" class="ideas-intro" hidden>Это <b>предложения Клода</b> для 6–8 лет, пока не согласованные. Отметь под каждым «Хотим», «Позже» или «Нет» — выбор запоминается в этом браузере. Потом нажми «Скопировать итог» и пришли мне, я перенесу по вкладкам.</div>
+  <div id="ideas-intro" class="ideas-intro" hidden>Это <b>предложения Клода</b> для 6–8 лет, пока не согласованные. Отметь под каждым «Хотим», «Позже», «Были» или «Нет» — выбор запоминается в этом браузере. Потом нажми «Скопировать итог» и пришли мне, я перенесу по вкладкам.</div>
   <div id="summary" class="summary" hidden><span id="summary-text"></span><span><button class="copy" type="button" id="copy-btn">Скопировать итог</button> <span id="copied" class="copied" hidden>скопировано</span></span></div>
   <div class="list" id="list"></div>
 
@@ -160,12 +161,12 @@ const openRows = new Set();
 let decisions = {};
 try { decisions = JSON.parse(localStorage.getItem('teatr-decisions')||'{}') || {}; } catch(e){}
 function saveDecisions(){ try{ localStorage.setItem('teatr-decisions', JSON.stringify(decisions)); }catch(e){} }
-const DLABEL = {want:'хотим', later:'позже', no:'нет'};
+const DLABEL = {want:'хотим', later:'позже', seen:'были', no:'нет'};
 function decideHtml(s){
   const d = decisions[s.id] || {};
-  const b = k => `<button class="dbtn ${k}" type="button" data-id="${esc(s.id)}" data-k="${k}" aria-pressed="${d.k===k}">${esc({want:'Хотим',later:'Позже',no:'Нет'}[k])}</button>`;
+  const b = k => `<button class="dbtn ${k}" type="button" data-id="${esc(s.id)}" data-k="${k}" aria-pressed="${d.k===k}">${esc({want:'Хотим',later:'Позже',seen:'Были',no:'Нет'}[k])}</button>`;
   const sel = d.k==='later' ? `<select data-id="${esc(s.id)}" class="later-age" aria-label="с какого возраста">${[8,9,10,11,12,14].map(a=>`<option value="${a}"${(d.age||10)==a?' selected':''}>в ${a}+</option>`).join('')}</select>` : '';
-  return `<div class="decide">${b('want')}${b('later')}${b('no')}${sel}</div>`;
+  return `<div class="decide">${b('want')}${b('later')}${b('seen')}${b('no')}${sel}</div>`;
 }
 function summaryText(){
   return SHOWS.filter(s=>s.status==='idea' && decisions[s.id]).map(s=>{ const d=decisions[s.id]; return `${s.title} (${s.theater}) — ${DLABEL[d.k]}${d.k==='later'?' в '+(d.age||10)+'+':''}`; }).join('\n');
