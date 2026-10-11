@@ -1,0 +1,195 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Детские спектакли</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prata&family=Golos+Text:wght@400;500;600&display=swap">
+<style>
+/* Layout: театральная программка — узкая колонка, крупные названия, шапка с «что ждём», карточки списком */
+:root{
+  --bg:#f5f2f4; --paper:#ffffff; --fg:#241c26; --muted:#6f6474; --line:#e3dce2;
+  --accent:#8e2a4b; --accent-soft:#f6e6ec; --gold:#a4792a; --gold-soft:#f5ecd9;
+  --ok:#2f7a4f; --ok-soft:#e3f1e8; --bad:#8a4a4a; --bad-soft:#f2e3e3;
+  --display:'Prata',Georgia,'Times New Roman',serif; --body:'Golos Text',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1b151d; --paper:#251d28; --fg:#f1eaf0; --muted:#a79cab; --line:#3a3040;
+  --accent:#e08aa6; --accent-soft:#3a2230; --gold:#dcb15c; --gold-soft:#3a3020;
+  --ok:#7fcf9c; --ok-soft:#1f3a2a; --bad:#e3a1a1; --bad-soft:#402626; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1b151d; --paper:#251d28; --fg:#f1eaf0; --muted:#a79cab; --line:#3a3040;
+  --accent:#e08aa6; --accent-soft:#3a2230; --gold:#dcb15c; --gold-soft:#3a3020;
+  --ok:#7fcf9c; --ok-soft:#1f3a2a; --bad:#e3a1a1; --bad-soft:#402626; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;margin:0}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 56px;padding-inline:16px}
+a{color:var(--accent)}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,6vw,44px);line-height:1.1;margin:0 0 6px;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 22px}
+.sub b{color:var(--fg);font-weight:500}
+
+/* переключатели */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{appearance:none;border:1px solid var(--line);background:var(--paper);color:var(--fg);border-radius:999px;padding:8px 16px;font:inherit;font-weight:500;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab .n{opacity:.65;font-weight:400;margin-left:4px}
+.tab:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:22px;color:var(--muted);font-size:13px}
+.chip{appearance:none;border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:8px;padding:4px 10px;font:inherit;font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+
+/* строки списка */
+.list{display:grid;gap:0;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{border-top:1px solid var(--line);padding:14px 18px;display:grid;gap:6px;min-width:0}
+.row:first-child{border-top:0}
+.row .top{display:grid;grid-template-columns:118px 1fr auto;gap:10px 14px;align-items:baseline}
+@media (max-width:560px){.row .top{grid-template-columns:1fr auto}.row .when{grid-column:1/-1}}
+.when{font-weight:600;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);text-decoration:none;white-space:nowrap}
+.when.open{color:var(--ok)}
+.when.soldout{color:var(--bad)}
+.when.seen,.when.unknown{color:var(--muted)}
+a.when:hover{text-decoration:underline}
+.main{min-width:0}
+.title{font-family:var(--display);font-size:21px;line-height:1.2;color:var(--fg);text-decoration:none}
+a.title:hover{text-decoration:underline}
+.age{font-weight:600;font-size:12px;border:1.5px solid var(--muted);color:var(--muted);border-radius:5px;padding:0 5px;margin-left:8px;vertical-align:2px;font-variant-numeric:tabular-nums}
+.line{color:var(--muted);font-size:14px;margin-top:2px}
+.line a{color:var(--fg);text-decoration:none;border-bottom:1px solid var(--line)}
+.line a:hover{border-color:var(--accent)}
+.line .plan{color:var(--gold);font-weight:600}
+.line .next{font-variant-numeric:tabular-nums}
+.more{appearance:none;border:0;background:transparent;color:var(--accent);font:inherit;font-size:13.5px;cursor:pointer;padding:4px 0;white-space:nowrap;align-self:start}
+.more:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.more::after{content:' ▾';font-size:11px}
+.row.open-details .more::after{content:' ▴'}
+.details{display:grid;gap:10px;padding:8px 0 4px;border-top:1px dashed var(--line);margin-top:4px}
+.desc{margin:0}
+.comment{margin:0;padding:10px 12px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;font-style:italic}
+.comment.empty{font-style:normal;color:var(--muted);border-color:var(--line);background:transparent;padding-left:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:13px}
+.dates{display:flex;flex-wrap:wrap;gap:6px}
+.date{font-variant-numeric:tabular-nums;font-size:13px;border:1px solid var(--line);border-radius:6px;padding:3px 8px;background:var(--bg)}
+.date b{font-weight:600}
+.note{margin:0;color:var(--muted);font-size:13.5px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{display:inline-block;text-decoration:none;font-size:13.5px;font-weight:500;border-radius:8px;padding:6px 12px;border:1px solid var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff}
+.empty-list{color:var(--muted);text-align:center;padding:32px 16px}
+.ideas-intro{background:var(--gold-soft);border-radius:10px;padding:12px 14px;margin-bottom:14px;color:var(--fg);font-size:14px}
+.ideas-intro b{color:var(--gold)}
+.foot{margin-top:36px;color:var(--muted);font-size:13px;text-align:center}
+</style></head><body>
+
+<div class="wrap">
+  <h1>Детские спектакли</h1>
+  <p class="sub">Москва, сезон 2026/27 · для детей <b>6–8 лет</b> · даты и статусы продаж проверены <b>10 октября 2026</b></p>
+
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div class="filters" id="filters"><span>Возраст:</span></div>
+
+  <div id="ideas-intro" class="ideas-intro" hidden>Это <b>предложения Клода</b> для 6–8 лет, пока не согласованные. Скажи «окей» по любому, и он переедет в «Хотим посмотреть».</div>
+  <div class="list" id="list"></div>
+
+  <p class="foot">Ссылки ведут на официальные сайты театров. Ближайшие даты — с афиш театров, перед покупкой проверяй на сайте.</p>
+</div>
+
+<script>
+const SHOWS = [{"id": "mama-kot", "status": "want", "title": "Мама-кот", "theater": "Театр им. Маяковского", "site": "https://www.mayakovsky.ru", "url": "https://www.mayakovsky.ru/performance/mama-kot/", "address": "ул. Большая Никитская, 19/13", "metro": "Арбатская / Пушкинская", "age": 6, "duration": "2 ч с антрактом", "comment": "", "plan": "Ждём дат на 2027", "watch": "2027-01", "dates": ["2026-11-04 12:00", "2026-12-19 12:00"], "sales": "open", "salesNote": "4 ноября и 19 декабря в продаже. Дат на январь 2027 на сайте пока нет, дата открытия продаж не объявлена.", "price": "от 1 000 ₽", "description": "Музыкальный спектакль по Сепульведе с музыкой Максима Леонидова: портовый кот Зорбас обещает чайке вырастить её птенца, и коты учат его летать."}, {"id": "sinyaya-ptitsa", "status": "want", "title": "Синяя синяя птица", "theater": "Театр Наций", "site": "https://theatreofnations.ru", "url": "https://theatreofnations.ru/performances/sinyaya-sinyaya-ptitsa", "address": "Петровский пер., 3", "metro": "Чеховская / Пушкинская", "age": 6, "duration": "2 ч 30 мин с антрактом", "comment": "", "plan": "Продажи на январь открылись 9 октября!", "watch": "", "dates": ["2027-01-05", "2027-01-06", "2027-01-07"], "sales": "open", "salesNote": "Продажа на 5, 6 и 7 января открылась 9 октября в 18:00 на сайте театра. Обычно раскупают быстро, наличие мест не проверено. Время сеансов смотреть на сайте (по агрегатору 5.01 в 13:00). Касса закрыта, бумажные билеты в фойе за час до начала.", "price": "от 1 000 ₽", "description": "Семейный мюзикл Олега Глушкова по Метерлинку: Матильда и медвежонок Тидель путешествуют по сказочным странам. Традиционный новогодний хит театра."}, {"id": "ostrov-most", "status": "want", "title": "Остров сокровищ", "theater": "Театр МОСТ", "site": "https://teatrmost.ru", "url": "https://teatrmost.ru/repertiour/ostrov-sokrovishh/", "address": "Большая Садовая, 6 (касса) · Новая сцена — Новинский бульвар, 22", "metro": "Маяковская · Баррикадная", "age": 6, "duration": "1–1,5 ч, с интерактивом", "comment": "", "plan": "Ждём дат на декабрь", "watch": "2026-12", "dates": ["2026-10-24 12:00", "2026-11-29 12:00"], "sales": "open", "salesNote": "В афише пока только октябрь и ноябрь, декабрьских дат нет. Первые три ряда отведены детям, взрослым — ряды 4–6.", "price": "от 1 500 ₽", "description": "Приключенческий спектакль по Стивенсону с интерактивом: Джим Хокинс ищет клад капитана Флинта."}, {"id": "alisa-fomenko", "status": "want", "title": "Алиса в Зазеркалье", "theater": "Мастерская Петра Фоменко", "site": "https://fomenki.ru", "url": "https://fomenki.ru/performance/alice/", "address": "Кутузовский проспект, 30 (Новая сцена)", "metro": "Кутузовская", "age": 7, "duration": "около 3 ч с антрактом", "comment": "", "plan": "Декабрь открыт: 31.12 в продаже", "watch": "", "dates": ["2026-11-01 14:00", "2026-11-22 14:00", "2026-12-31 14:00"], "sales": "open", "salesNote": "Декабрьское расписание опубликовано целиком: в декабре одна «Алиса» — 31 декабря в 14:00, билеты в продаже. Январь ещё не опубликован. Дети до 14 — только со взрослым.", "price": "1 000–15 000 ₽", "description": "Первый детский спектакль Мастерской (Иван Поповски, 2010): шахматное зазеркалье Кэрролла с превращениями и фирменной фоменковской магией. Длинный, но очень красивый."}, {"id": "kai-gerda", "status": "want", "title": "История Кая и Герды", "theater": "Большой театр, Новая сцена", "site": "https://bolshoi.ru", "url": "https://bolshoi.ru/performances/", "address": "ул. Большая Дмитровка, 4/2", "metro": "Театральная", "age": 6, "duration": "", "comment": "", "plan": "Позже", "watch": "", "dates": [], "sales": "waiting", "salesNote": "Опера Баневича по «Снежной королеве». Сайт Большого из нашей сети не открылся, даты не проверены.", "price": ""}, {"id": "konek", "status": "want", "title": "Конёк-Горбунок", "theater": "Большой театр, Новая сцена", "site": "https://bolshoi.ru", "url": "https://bolshoi.ru/performances/", "address": "ул. Большая Дмитровка, 4/2", "metro": "Театральная", "age": 6, "duration": "", "comment": "", "plan": "Позже", "watch": "", "dates": [], "sales": "waiting", "salesNote": "Балет Щедрина в постановке Ратманского. Сайт Большого из нашей сети не открылся, даты не проверены.", "price": ""}, {"id": "peter-pan", "status": "seen", "title": "Питер Пэн", "theater": "Театр им. Вахтангова", "site": "https://vakhtangov.ru", "url": "", "address": "ул. Арбат, 26", "metro": "Смоленская / Арбатская", "age": 6, "comment": "", "dates": []}, {"id": "bukashki", "status": "seen", "title": "Букашки", "theater": "Театр Терезы Дуровой", "site": "https://teatrium.ru", "url": "", "address": "ул. Павловская, 6", "metro": "Серпуховская / Тульская", "age": 3, "comment": "", "dates": []}, {"id": "aladdin-durova", "status": "seen", "title": "Аладдин", "theater": "Театр Терезы Дуровой", "site": "https://teatrium.ru", "url": "", "address": "ул. Павловская, 6", "metro": "Серпуховская / Тульская", "age": 6, "comment": "", "dates": []}, {"id": "podsnezhniki", "status": "seen", "title": "Подснежники для королевы", "theater": "Малый театр", "site": "https://www.maly.ru", "url": "", "address": "Театральный проезд, 1", "metro": "Театральная", "age": 6, "comment": "", "dates": []}, {"id": "peppi", "status": "seen", "title": "Пеппи Длинныйчулок", "theater": "Детский музыкальный театр юного актёра", "site": "https://dmtya.ru", "url": "", "address": "ул. Макаренко, 4, стр. 1", "metro": "Чистые пруды", "age": 6, "comment": "", "dates": []}, {"id": "bremen", "status": "seen", "title": "Бременские музыканты", "theater": "Театр им. Моссовета", "site": "https://mossoveta.ru", "url": "", "address": "Большая Садовая, 16 (сад «Аквариум»)", "metro": "Маяковская", "age": 6, "comment": "", "dates": []}, {"id": "porosyata-taganka", "status": "seen", "title": "Три поросёнка", "theater": "Театр на Таганке", "site": "https://tagankateatr.ru", "url": "", "address": "ул. Земляной Вал, 76/21", "metro": "Таганская", "age": 3, "comment": "", "dates": []}, {"id": "deniska", "status": "idea", "title": "Денискины рассказы", "theater": "РАМТ", "site": "https://ramt.ru", "url": "https://ramt.ru/plays/item/deniskiny-rasskazy/", "address": "Театральная пл., 2", "metro": "Театральная", "age": 6, "duration": "2 ч с антрактом", "description": "Рассказы Драгунского про Дениску — весёлый, динамичный, один из самых популярных детских в РАМТе.", "dates": ["2026-10-31 12:00", "2026-11-04 12:00", "2026-11-17 12:00", "2026-12-06 12:00", "2026-12-27 12:00"], "sales": "open", "salesNote": "До 27 декабря в продаже, январь ещё не опубликован.", "price": "от 500 ₽"}, {"id": "tom-sawyer", "status": "idea", "title": "Приключения Тома Сойера", "theater": "РАМТ", "site": "https://ramt.ru", "url": "https://ramt.ru/plays/item/priklyucheniya-toma-soyera/", "address": "Театральная пл., 2", "metro": "Театральная", "age": 6, "duration": "2 ч с антрактом", "description": "Марк Твен в комедийной инсценировке, в репертуаре с 1989 года — проверенная классика РАМТа для младших школьников.", "dates": ["2026-10-29 12:00", "2026-11-03 12:00", "2026-11-18 12:00", "2026-12-26 12:00"], "sales": "open", "salesNote": "", "price": "от 500 ₽"}, {"id": "kot-v-sapogah", "status": "idea", "title": "Кот в сапогах", "theater": "Театр им. Вахтангова", "site": "https://vakhtangov.ru", "url": "https://vakhtangov.ru/show/kot_v_sapogah/", "address": "ул. Арбат, 26", "metro": "Смоленская", "age": 6, "duration": "2 ч с антрактом", "description": "Музыкальная сказка с песнями, акробатикой и видеопроекцией; играют молодые артисты и студенты Щукинского института. Премия «Звезда Театрала».", "dates": ["2026-10-17 12:00", "2026-11-07 12:00", "2026-11-22 12:00", "2026-11-29 12:00", "2026-12-05 12:00"], "sales": "open", "salesNote": "", "price": "300–3 200 ₽"}, {"id": "konek-mxat", "status": "idea", "title": "Конёк-Горбунок", "theater": "МХТ им. Чехова", "site": "https://mxat.ru", "url": "https://mxat.ru/repertuar/show/gorbunok/", "address": "Камергерский пер., 3", "metro": "Охотный Ряд", "age": 6, "duration": "2 ч 40 мин с антрактом", "description": "Музыкальный спектакль Евгения Писарева: 12-метровая Рыба-Кит, полёты над сценой, подводное царство. Большой зрелищный хит для всей семьи.", "dates": ["2026-11-29 13:00", "2026-11-29 18:00"], "sales": "open", "salesNote": "Декабрь и январь на сайте МХТ ещё не опубликованы.", "price": "600–6 500 ₽"}, {"id": "snow-queen-maly", "status": "idea", "title": "Снежная королева", "theater": "Малый театр, сцена на Ордынке", "site": "https://www.maly.ru", "url": "https://www.maly.ru/spectacle/view?name=snowqueen", "address": "ул. Большая Ордынка, 69", "metro": "Добрынинская", "age": 6, "duration": "2 ч 10 мин с антрактом", "description": "Сказка Шварца по Андерсену — классическая, красивая новогодняя постановка Малого.", "dates": ["2026-11-22 11:00", "2026-11-29 11:00", "2026-12-06 11:00", "2026-12-12 11:00", "2026-12-31 11:00"], "sales": "open", "salesNote": "", "price": "от 2 200 ₽"}, {"id": "aladdin-obraztsov", "status": "idea", "title": "Волшебная лампа Аладдина", "theater": "Театр кукол Образцова", "site": "https://puppet.ru", "url": "https://puppet.ru/performances/volshebnaya-lampa-aladdina", "address": "Садовая-Самотёчная ул., 3", "metro": "Цветной бульвар", "age": 6, "duration": "1 ч 30 мин с антрактом", "description": "Золотой фонд театра, идёт с 1940 года: тростевые куклы, летающий Джинн и принцесса Будур.", "dates": ["2026-11-08 11:00", "2026-11-20 11:00", "2026-12-20 11:00", "2026-12-29 11:00"], "sales": "soldout", "salesNote": "На сайте театра всё до конца декабря продано, остатки бывают на Яндекс Афише. Январь ещё не опубликован.", "price": "от 400 ₽"}, {"id": "letuchiy", "status": "idea", "title": "Летучий корабль", "theater": "Театр Терезы Дуровой", "site": "https://teatrium.ru", "url": "https://teatrium.ru/repertoire/letuchiy-korabl/", "address": "ул. Павловская, 6", "metro": "Серпуховская", "age": 6, "duration": "1 ч 50 мин с антрактом", "description": "Большой мюзикл по мультфильму с песнями Дунаевского и Энтина. Хит театра.", "dates": ["2026-12-19 14:00", "2026-12-20 11:00", "2027-01-06 11:00", "2027-01-07 12:00"], "sales": "unknown", "salesNote": "Даты стоят на странице спектакля, но в общей афише зима пустая — продажи, похоже, ещё не открыты.", "price": ""}, {"id": "prince-mgt", "status": "idea", "title": "Маленький принц", "theater": "Губернский театр", "site": "https://m-g-t.ru", "url": "https://m-g-t.ru/performance/prince/", "address": "Волгоградский проспект, 121", "metro": "Кузьминки", "age": 6, "duration": "2 ч с антрактом", "description": "Сент-Экзюпери под живой оркестр с французской музыкой, на экране — рисунки автора.", "dates": ["2026-11-07 12:00", "2026-11-29 12:00"], "sales": "open", "salesNote": "", "price": "1 000–4 000 ₽"}, {"id": "nutcracker-sats", "status": "idea", "title": "Щелкунчик (Цискаридзе)", "theater": "Театр им. Сац, на сцене ЦКИ «Меридиан»", "site": "https://teatr-sats.ru", "url": "https://teatr-sats.ru/afisha", "address": "ул. Профсоюзная, 61", "metro": "Калужская", "age": 6, "duration": "2 ч 20 мин с антрактом", "description": "Полноценный двухактный «Щелкунчик» с живым оркестром за разумные деньги — реальная альтернатива Большому.", "dates": ["2026-12-25 19:00", "2026-12-26 14:00", "2026-12-27 14:00"], "sales": "open", "salesNote": "", "price": "500–2 500 ₽"}, {"id": "nutcracker-stanmus", "status": "idea", "title": "Щелкунчик (Посохов)", "theater": "Музыкальный театр Станиславского", "site": "https://stanmus.ru", "url": "https://stanmus.ru/shows/shhelkunchik/", "address": "ул. Большая Дмитровка, 17", "metro": "Пушкинская", "age": 6, "duration": "2 ч 15 мин с антрактом", "description": "Современная очень красивая версия 2022 года — декорации как гигантская раскладная книга.", "dates": [], "sales": "waiting", "salesNote": "Афиша открыта только до 29 ноября. В прошлом сезоне шёл 20 декабря – 4 января. Следить за сайтом в ноябре.", "price": "в прошлом сезоне от 4 000 ₽"}, {"id": "nutcracker-bolshoi", "status": "idea", "title": "Щелкунчик", "theater": "Большой театр, Историческая сцена", "site": "https://bolshoi.ru", "url": "https://bolshoi.ru/performances/", "address": "Театральная пл., 1", "metro": "Театральная", "age": 6, "duration": "2 ч 20 мин", "description": "Главный новогодний балет страны. Билеты раскупают за минуты.", "dates": [], "sales": "waiting", "salesNote": "Анонса на 2026/27 нет. В прошлом году продажи открылись 2 декабря в 10:00 только онлайн, часть — через аукцион с 26 ноября. Ждать анонса в конце ноября.", "price": "в прошлом сезоне от ~5 000 ₽"}, {"id": "melkin", "status": "idea", "title": "Тайна тётушки Мэлкин", "theater": "Театр Et Cetera", "site": "https://et-cetera.ru", "url": "https://et-cetera.ru/performance/tayna_tetushki_melkin/", "address": "Фролов пер., 2", "metro": "Тургеневская", "age": 6, "duration": "1 ч 50 мин с антрактом", "description": "Музыкальная сказка по пьесе Алана Милна, автора Винни-Пуха. Идёт с 2005 года.", "dates": ["2026-10-31 12:00", "2026-10-31 16:00"], "sales": "open", "salesNote": "В ноябре и декабре показов нет.", "price": ""}];
+const TABS = [
+  {key:'want', label:'Хотим посмотреть'},
+  {key:'seen', label:'Смотрели'},
+  {key:'idea', label:'Предложения'}
+];
+const AGES = [{v:0,l:'все'},{v:3,l:'ребёнку 3'},{v:6,l:'ребёнку 6'},{v:8,l:'ребёнку 8'}];
+const MONTHS = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+const TODAY = new Date('2026-10-10T00:00:00');
+
+let tab = 'want', age = 0;
+try { const s = JSON.parse(localStorage.getItem('teatr-ui')||'{}'); if (TABS.some(t=>t.key===s.tab)) tab = s.tab; if (AGES.some(a=>a.v===s.age)) age = s.age; } catch(e){}
+if (location.hash === '#seen' || location.hash === '#idea' || location.hash === '#want') tab = location.hash.slice(1);
+
+function save(){ try{ localStorage.setItem('teatr-ui', JSON.stringify({tab,age})); }catch(e){} }
+function esc(s){ return String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmtDate(d){
+  const [date,time] = d.split(' ');
+  const [y,m,dd] = date.split('-').map(Number);
+  const dt = new Date(y, m-1, dd);
+  const wd = ['вс','пн','вт','ср','чт','пт','сб'][dt.getDay()];
+  const yr = y !== TODAY.getFullYear() ? ' '+y : '';
+  return `<b>${dd} ${MONTHS[m-1]}${yr}</b>, ${wd}${time ? ' · '+time : ''}`;
+}
+function upcoming(dates){ return (dates||[]).filter(d => new Date(d.split(' ')[0]) >= TODAY); }
+const SALES = {open:'Билеты в продаже', waiting:'Ждём открытия продаж', soldout:'Распродано', unknown:'Статус продаж неясен'};
+
+function renderTabs(){
+  const el = document.getElementById('tabs'); el.innerHTML = '';
+  TABS.forEach(t=>{
+    const n = SHOWS.filter(s=>s.status===t.key).length;
+    const b = document.createElement('button'); b.className='tab'; b.type='button'; b.role='tab'; b.id='tab-'+t.key;
+    b.setAttribute('aria-selected', String(tab===t.key));
+    b.innerHTML = esc(t.label)+`<span class="n">${n}</span>`;
+    b.onclick = ()=>{ tab=t.key; save(); render(); };
+    el.appendChild(b);
+  });
+}
+function renderFilters(){
+  const el = document.getElementById('filters');
+  el.querySelectorAll('.chip').forEach(c=>c.remove());
+  AGES.forEach(a=>{
+    const b = document.createElement('button'); b.className='chip'; b.type='button'; b.id='age-'+a.v;
+    b.setAttribute('aria-pressed', String(age===a.v)); b.textContent=a.l;
+    b.onclick=()=>{ age=a.v; save(); render(); };
+    el.appendChild(b);
+  });
+}
+const openRows = new Set();
+function mapLink(s){ return 'https://yandex.ru/maps/?text=' + encodeURIComponent('Москва, ' + (s.address||s.theater)); }
+function whenLabel(s){
+  if (s.status==='seen') return {cls:'seen', text:'смотрели', href:''};
+  const up = upcoming(s.dates);
+  if (s.sales==='open' && up.length) return {cls:'open', text:'в продаже', href: s.tickets || s.url || s.site};
+  if (s.sales==='soldout') return {cls:'soldout', text:'распродано', href: s.tickets || s.url || ''};
+  if (s.watch){ const [y,m]=s.watch.split('-').map(Number); return {cls:'waiting', text:'ждём · '+MONTHS[m-1].replace('мая','май'), href:''}; }
+  if (s.sales==='waiting') return {cls:'waiting', text:'ждём', href:''};
+  return {cls:'unknown', text:'уточнить', href: s.url || ''};
+}
+function row(s){
+  const w = whenLabel(s);
+  const whenHtml = w.href ? `<a class="when ${w.cls}" href="${esc(w.href)}" target="_blank" rel="noopener">${esc(w.text)}</a>` : `<span class="when ${w.cls}">${esc(w.text)}</span>`;
+  const titleHtml = s.url ? `<a class="title" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` : `<span class="title">${esc(s.title)}</span>`;
+  const up = upcoming(s.dates);
+  const parts = [`<a href="${mapLink(s)}" target="_blank" rel="noopener" title="${esc(s.address||'')}">${esc(s.theater)}</a>`];
+  if (s.status!=='seen' && up.length) parts.push(`<span class="next">ближайшее ${fmtDate(up[0])}</span>`);
+  if (s.status==='want' && s.plan) parts.push(`<span class="plan">${esc(s.plan)}</span>`);
+  const isOpen = openRows.has(s.id);
+  let d = '';
+  if (isOpen){
+    d += s.description ? `<p class="desc">${esc(s.description)}</p>` : '';
+    if (s.status==='seen') d += s.comment ? `<p class="comment">${esc(s.comment)}</p>` : `<p class="comment empty">Впечатления добавим позже.</p>`;
+    else if (s.comment) d += `<p class="comment">${esc(s.comment)}</p>`;
+    const meta = [s.duration, s.price, (s.address ? s.address + (s.metro ? ' · м. '+s.metro : '') : '')].filter(Boolean).map(esc);
+    if (meta.length) d += `<div class="meta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`;
+    if (s.status!=='seen'){
+      if (up.length) d += `<div class="dates">${up.slice(0,8).map(x=>`<span class="date">${fmtDate(x)}</span>`).join('')}</div>`;
+      if (s.salesNote) d += `<p class="note">${esc(s.salesNote)}</p>`;
+    }
+    const btns = [];
+    if (s.status!=='seen' && (s.tickets||s.url)) btns.push(`<a class="btn primary" href="${esc(s.tickets||s.url)}" target="_blank" rel="noopener">Купить билеты</a>`);
+    if (s.site) btns.push(`<a class="btn" href="${esc(s.site)}" target="_blank" rel="noopener">Сайт театра</a>`);
+    btns.push(`<a class="btn" href="${mapLink(s)}" target="_blank" rel="noopener">На карте</a>`);
+    d += `<div class="btns">${btns.join('')}</div>`;
+    d = `<div class="details">${d}</div>`;
+  }
+  return `<div class="row${isOpen?' open-details':''}" id="show-${esc(s.id)}">
+    <div class="top">${whenHtml}
+      <div class="main">${titleHtml}<span class="age">${s.age ?? 0}+</span><div class="line">${parts.join(' · ')}</div></div>
+      <button class="more" type="button" data-id="${esc(s.id)}" aria-expanded="${isOpen}">${isOpen?'Скрыть':'Подробнее'}</button>
+    </div>${d}</div>`;
+}
+function render(){
+  renderTabs(); renderFilters();
+  document.getElementById('ideas-intro').hidden = tab!=='idea';
+  const filtered = SHOWS.filter(s=>s.status===tab).filter(s=>!age || (s.age ?? 0) <= age);
+  const el = document.getElementById('list');
+  el.innerHTML = filtered.length ? filtered.map(row).join('') : `<p class="empty-list">Тут пока пусто.</p>`;
+  el.querySelectorAll('.more').forEach(b=>b.onclick=()=>{ const id=b.dataset.id; openRows.has(id)?openRows.delete(id):openRows.add(id); render(); });
+}
+render();
+</script>
+</body></html>
