@@ -242,7 +242,7 @@ function render(){
     const PIN = '<svg class="pin" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
     el.innerHTML = order.map(k=>`<div class="group"><a href="${mapLink(groups[k][0])}" target="_blank" rel="noopener" title="${esc(groups[k][0].address||'')}">${PIN}${esc(k)}</a></div>` + groups[k].map(s=>row(s,true)).join('')).join('');
   } else
-  el.innerHTML = filtered.length ? filtered.map(row).join('') : `<p class="empty-list">${tab==='later' ? 'Сюда — спектакли на вырост, с пометкой, в каком возрасте пойдём.' : 'Тут пока пусто.'}</p>`;
+  el.innerHTML = filtered.length ? filtered.map(s=>row(s,false)).join('') : `<p class="empty-list">${tab==='later' ? 'Сюда — спектакли на вырост, с пометкой, в каком возрасте пойдём.' : 'Тут пока пусто.'}</p>`;
   el.querySelectorAll('.more').forEach(b=>b.onclick=()=>{ const id=b.dataset.id; openRows.has(id)?openRows.delete(id):openRows.add(id); render(); });
   el.querySelectorAll('.dbtn').forEach(b=>b.onclick=()=>{ const id=b.dataset.id, k=b.dataset.k; if (decisions[id]&&decisions[id].k===k) delete decisions[id]; else decisions[id]={k, age: k==='later' ? ((decisions[id]&&decisions[id].age)||10) : undefined}; saveDecisions(); render(); });
   el.querySelectorAll('.later-age').forEach(sel=>sel.onchange=()=>{ const id=sel.dataset.id; if (decisions[id]) { decisions[id].age=Number(sel.value); saveDecisions(); render(); } });
