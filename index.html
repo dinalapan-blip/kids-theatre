@@ -191,7 +191,8 @@ function row(s, inGroup){
   const whenHtml = w.href ? `<a class="when ${w.cls}" href="${esc(w.href)}" target="_blank" rel="noopener">${esc(w.text)}</a>` : `<span class="when ${w.cls}">${esc(w.text)}</span>`;
   const titleHtml = s.url ? `<a class="title" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` : `<span class="title">${esc(s.title)}</span>`;
   const up = upcoming(s.dates);
-  const parts = inGroup ? [] : [`<a href="${mapLink(s)}" target="_blank" rel="noopener" title="${esc(s.address||'')}">${esc(s.theater)}</a>`];
+  const stage = inGroup && s.theater.includes(',') ? [`<span>${esc(s.theater.split(',').slice(1).join(',').trim())}</span>`] : [];
+  const parts = inGroup ? stage : [`<a href="${mapLink(s)}" target="_blank" rel="noopener" title="${esc(s.address||'')}">${esc(s.theater)}</a>`];
   if (s.going) parts.push(`<span class="going">идём ${fmtDate(s.going)}</span>`);
   else if (up.length) parts.push(`<span class="next">ближайшее ${fmtDate(up[0])}</span>`);
   if (s.status==='later') parts.push(`<span class="plan">пойдём в ${esc(s.laterAge || '?')}+</span>`);
@@ -238,7 +239,7 @@ function render(){
   const el = document.getElementById('list');
   if (tab==='seen'){
     const order = []; const groups = {};
-    filtered.forEach(s=>{ const k = s.theater.trim(); if(!groups[k]){groups[k]=[];order.push(k);} groups[k].push(s); });
+    filtered.forEach(s=>{ const k = s.theater.split(',')[0].trim(); if(!groups[k]){groups[k]=[];order.push(k);} groups[k].push(s); });
     order.sort((a,b)=>a.localeCompare(b,'ru'));
     filtered.length = 0; order.forEach(k=>filtered.push(...groups[k]));
     const PIN = '<svg class="pin" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
